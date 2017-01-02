@@ -10,17 +10,17 @@
 UCLASS()
 class BATTERYCOLLECTOR_API ABatteryPickup : public APickup
 {
-	GENERATED_BODY()
+    GENERATED_BODY()
 public:
-	//Constructor
-	ABatteryPickup();
-	/**Use OnCollect Implementation because it is a blueprint native event*/
+    //Constructor
+    ABatteryPickup();
+    /**Use OnCollect Implementation because it is a blueprint native event*/
 
-	void OnCollect_Implementation() override;
+    void OnCollect_Implementation() override;
 
-	UFUNCTION(BlueprintPure, Category = "Power")
-	float GetBatteryPower();
+    UFUNCTION(BlueprintPure, Category = "Power")
+        float GetBatteryPower();
 protected:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Power")
-	float BatteryPower;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Power")
+        float BatteryPower;
 };

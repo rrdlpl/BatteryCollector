@@ -7,21 +7,21 @@
 UCLASS(minimalapi)
 class ABatteryCollectorGameMode : public AGameModeBase
 {
-	GENERATED_BODY()
+    GENERATED_BODY()
 
 public:
-	ABatteryCollectorGameMode();
+    ABatteryCollectorGameMode();
 
-	virtual void Tick(float DeltaSeconds) override;
+    virtual void Tick(float DeltaSeconds) override;
 
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
+    // Called when the game starts or when spawned
+    virtual void BeginPlay() override;
 protected:
-	/** The rate at which the character loses power */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Power")
-	float DecayRate;
+    /** The rate at which the character loses power */
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Power")
+        float DecayRate;
 
-	ABatteryCollectorCharacter* MyCharacter;
+    ABatteryCollectorCharacter* MyCharacter;
 };
 
 
