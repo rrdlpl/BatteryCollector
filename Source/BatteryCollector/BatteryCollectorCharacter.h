@@ -28,7 +28,15 @@ public:
 	/** Base look up/down rate, in deg/sec. Other scaling may affect final rate. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
 		float BaseLookUpRate;
+	
+	UFUNCTION(BlueprintCallable, Category = "Power")
+		void UpdateCurrentPower(float PowerChange);
 
+	UFUNCTION(BlueprintPure, Category = "Power")
+		float GetInitialPower();
+
+	UFUNCTION(BlueprintPure, Category = "Power")
+		float GetCurrentsPower();
 protected:
 
 	/** Resets HMD orientation in VR. */
@@ -66,14 +74,6 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "Pickups")
 		void CollectPickups();
 
-	UFUNCTION(BlueprintPure, Category = "Power")
-		float GetInitialPower();
-
-	UFUNCTION(BlueprintPure, Category = "Power")
-		float GetCurrentsPower();
-
-	UFUNCTION(BlueprintCallable, Category = "Power")
-		void UpdateCurrentPower(float PowerChange);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Power")
 		float InitialPower;
