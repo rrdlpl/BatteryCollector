@@ -3,6 +3,8 @@
 #include "BatteryCollector.h"
 #include "Kismet/HeadMountedDisplayFunctionLibrary.h"
 #include "BatteryCollectorCharacter.h"
+#include "Pickup.h"
+#include "BatteryPickup.h"
 
 //////////////////////////////////////////////////////////////////////////
 // ABatteryCollectorCharacter
@@ -33,10 +35,20 @@ ABatteryCollectorCharacter::ABatteryCollectorCharacter()
 	CameraBoom->TargetArmLength = 300.0f; // The camera follows at this distance behind the character	
 	CameraBoom->bUsePawnControlRotation = true; // Rotate the arm based on the controller
 
-	// Create a follow camera
+												// Create a follow camera
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
 	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
+
+												   //Create Collection Sphere
+
+	CollectionSphere = CreateDefaultSubobject<USphereComponent>(TEXT("CollectionSphereComponent"));
+	CollectionSphere->SetupAttachment(RootComponent);
+	CollectionSphere->SetSphereRadius(300.0f);
+	//Set initial power
+	InitialPower = 2000.0f;
+	CurrentPower = InitialPower;
+
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named MyCharacter (to avoid direct content references in C++)
@@ -51,6 +63,7 @@ void ABatteryCollectorCharacter::SetupPlayerInputComponent(class UInputComponent
 	check(PlayerInputComponent);
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
+	PlayerInputComponent->BindAction("Collect", IE_Pressed, this, &ABatteryCollectorCharacter::CollectPickups);
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &ABatteryCollectorCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &ABatteryCollectorCharacter::MoveRight);
@@ -79,12 +92,12 @@ void ABatteryCollectorCharacter::OnResetVR()
 
 void ABatteryCollectorCharacter::TouchStarted(ETouchIndex::Type FingerIndex, FVector Location)
 {
-		Jump();
+	Jump();
 }
 
 void ABatteryCollectorCharacter::TouchStopped(ETouchIndex::Type FingerIndex, FVector Location)
 {
-		StopJumping();
+	StopJumping();
 }
 
 void ABatteryCollectorCharacter::TurnAtRate(float Rate)
@@ -115,15 +128,61 @@ void ABatteryCollectorCharacter::MoveForward(float Value)
 
 void ABatteryCollectorCharacter::MoveRight(float Value)
 {
-	if ( (Controller != NULL) && (Value != 0.0f) )
+	if ((Controller != NULL) && (Value != 0.0f))
 	{
 		// find out which way is right
 		const FRotator Rotation = Controller->GetControlRotation();
 		const FRotator YawRotation(0, Rotation.Yaw, 0);
-	
+
 		// get right vector 
 		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 		// add movement in that direction
 		AddMovementInput(Direction, Value);
 	}
+}
+
+void ABatteryCollectorCharacter::CollectPickups()
+{
+	//UE_LOG(LogClass, Log, TEXT("colecting pickups"));
+	//Get all overlapping actors and store them into an array
+	TArray<AActor*> CollectedActors;
+	CollectionSphere->GetOverlappingActors(CollectedActors);
+
+	//UE_LOG(LogClass, Log, TEXT("Collected actors %d"), CollectedActors.Num());
+	float CollectedPower = 0.0f;
+	//Foreach actor we collected
+	for (int i = 0; i < CollectedActors.Num(); i++)
+	{
+		//Cast to APickup 
+		APickup* const Pickup = Cast<APickup>(CollectedActors[i]);
+		// if the cast is successfull and pickup is active and vaid
+		if (Pickup && !Pickup->IsPendingKill() && Pickup->IsActive()) {
+			// Call the pickup OnCollect function
+			//UE_LOG(LogClass, Log, TEXT("Destroying pickup "));
+			Pickup->OnCollect();
+			//Check if the pickup is a battery
+			ABatteryPickup* const Battery = Cast<ABatteryPickup>(Pickup);
+			if (Battery)
+			{
+				CollectedPower += Battery->GetBatteryPower();
+			}
+		}
+	}
+	UpdateCurrentPower(CollectedPower);
+}
+
+float ABatteryCollectorCharacter::GetInitialPower()
+{
+	return InitialPower;
+}
+
+float ABatteryCollectorCharacter::GetCurrentsPower()
+{
+	return 	CurrentPower;
+}
+
+void ABatteryCollectorCharacter::UpdateCurrentPower(float PowerChange)
+{
+	CurrentPower += PowerChange;
+
 }
