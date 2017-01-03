@@ -4,6 +4,7 @@
 #include "BatteryCollectorGameMode.h"
 #include "BatteryCollectorCharacter.h"
 #include "Kismet/GameplayStatics.h"
+#include "Blueprint/UserWidget.h"
 
 ABatteryCollectorGameMode::ABatteryCollectorGameMode()
 {
@@ -21,10 +22,30 @@ ABatteryCollectorGameMode::ABatteryCollectorGameMode()
 
 void ABatteryCollectorGameMode::BeginPlay()
 {
+    Super::BeginPlay();
     //Returns Main character
     APawn* CharacterPawn = UGameplayStatics::GetPlayerPawn(this, 0);
     //If we are using battery collector character this cast should be successful.
     MyCharacter = Cast<ABatteryCollectorCharacter>(CharacterPawn);
+    //Set the score to beat
+    if (MyCharacter)
+    {
+        PowerToWin = MyCharacter->GetInitialPower() * 1.25;
+    }
+    if (HUDWidgetClass != nullptr) 
+    {
+        CurrentWidget = CreateWidget<UUserWidget>(GetWorld(), HUDWidgetClass);
+        if (CurrentWidget != nullptr)
+        {
+            CurrentWidget->AddToViewport();
+        }
+    }
+
+}
+
+float ABatteryCollectorGameMode::GetPowerToWin() const
+{
+    return PowerToWin;
 }
 
 void ABatteryCollectorGameMode::Tick(float DeltaSeconds)
@@ -45,3 +66,4 @@ void ABatteryCollectorGameMode::Tick(float DeltaSeconds)
         UE_LOG(LogClass, Log, TEXT("Character couldnt be cast "));
     }
 }
+
