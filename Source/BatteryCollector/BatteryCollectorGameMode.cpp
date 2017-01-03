@@ -23,6 +23,8 @@ ABatteryCollectorGameMode::ABatteryCollectorGameMode()
 void ABatteryCollectorGameMode::BeginPlay()
 {
     Super::BeginPlay();
+
+    SetCurrentState(EBatteryPlayState::EPlaying);
     //Returns Main character
     APawn* CharacterPawn = UGameplayStatics::GetPlayerPawn(this, 0);
     //If we are using battery collector character this cast should be successful.
@@ -32,7 +34,7 @@ void ABatteryCollectorGameMode::BeginPlay()
     {
         PowerToWin = MyCharacter->GetInitialPower() * 1.25;
     }
-    if (HUDWidgetClass != nullptr) 
+    if (HUDWidgetClass != nullptr)  
     {
         CurrentWidget = CreateWidget<UUserWidget>(GetWorld(), HUDWidgetClass);
         if (CurrentWidget != nullptr)
@@ -55,10 +57,17 @@ void ABatteryCollectorGameMode::Tick(float DeltaSeconds)
 
     if (MyCharacter)
     {
-        if (MyCharacter->GetCurrentsPower() > 0.0f)
+        if (MyCharacter->GetCurrentsPower() > GetPowerToWin())
+        {
+            SetCurrentState(EBatteryPlayState::EWon);
+        }
+        else if (MyCharacter->GetCurrentsPower() > 0.0f)
         {
             UE_LOG(LogClass, Log, TEXT("Killing the character "));
             MyCharacter->UpdateCurrentPower(-DeltaSeconds*DecayRate*(MyCharacter->GetInitialPower()));
+        }
+        else {
+            SetCurrentState(EBatteryPlayState::EGameOver);
         }
     }
     else
@@ -67,3 +76,12 @@ void ABatteryCollectorGameMode::Tick(float DeltaSeconds)
     }
 }
 
+EBatteryPlayState ABatteryCollectorGameMode::GetCurrentState() const
+{
+    return CurrentState;
+}
+
+void ABatteryCollectorGameMode::SetCurrentState(EBatteryPlayState NewState)
+{
+    CurrentState = NewState;
+}
