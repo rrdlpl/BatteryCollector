@@ -28,6 +28,10 @@ public:
     UFUNCTION(BlueprintPure, Category = "Spawning")
         FRotator GetRandomRotation();
 
+    /**This function toggles whether or not the spawn volume spawn pickups */
+    UFUNCTION(BlueprintCallable, Category = "Spawning")
+        void SetSpawningActive(bool ShouldSpawn);
+
 protected:
 
     /** The pickup to spawn */

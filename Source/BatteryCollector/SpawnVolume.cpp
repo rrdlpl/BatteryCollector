@@ -24,7 +24,7 @@ void ASpawnVolume::BeginPlay()
 {
     Super::BeginPlay();
 
-    UpdateSpawnTimer();
+    
 
 }
 
@@ -48,6 +48,20 @@ FRotator ASpawnVolume::GetRandomRotation()
     SpawnRotation.Pitch = FMath::FRand() * 360.0;
     SpawnRotation.Roll = FMath::FRand() * 360.0;
     return SpawnRotation;
+}
+
+void ASpawnVolume::SetSpawningActive(bool bShouldSpawn)
+{
+    if (bShouldSpawn)
+    {
+        UpdateSpawnTimer();
+    }
+    else
+    {
+        //Clear the timer
+        GetWorldTimerManager().ClearTimer(SpawnTimer);
+
+    }
 }
 
 void ASpawnVolume::SpawnPickup()
