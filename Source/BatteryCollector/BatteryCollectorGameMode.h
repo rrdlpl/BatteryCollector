@@ -60,6 +60,20 @@ private:
     EBatteryPlayState CurrentState;
 
     TArray<class ASpawnVolume*> SpawnVolumeActors;
+
+    /**Handles any function call that rely upon changing the play state our game*/
+    void HandleNewState(EBatteryPlayState NewState);
+
+    /**Initialize spawn volumes*/
+    void InitializeSpawn();
+    /**Deactivates spawn volume*/
+    void DeactivateSpawn();
+    /**Activates spawn volume*/
+    void ActivateSpawn();
+    /**Blocks player input*/
+    void BlockPlayerInput();
+    /** Makes the character to 'die as a doll' by simulating physics*/
+    void RagdollCharacter();
 };
 
 

@@ -23,9 +23,6 @@ ASpawnVolume::ASpawnVolume()
 void ASpawnVolume::BeginPlay()
 {
     Super::BeginPlay();
-
-    
-
 }
 
 // Called every frame

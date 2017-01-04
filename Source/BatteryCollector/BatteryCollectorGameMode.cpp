@@ -24,7 +24,8 @@ ABatteryCollectorGameMode::ABatteryCollectorGameMode()
 void ABatteryCollectorGameMode::BeginPlay()
 {
     Super::BeginPlay();
-
+    //find all spawn volume actors.
+    InitializeSpawn();
     SetCurrentState(EBatteryPlayState::EPlaying);
     //Returns Main character
     APawn* CharacterPawn = UGameplayStatics::GetPlayerPawn(this, 0);
@@ -35,24 +36,12 @@ void ABatteryCollectorGameMode::BeginPlay()
     {
         PowerToWin = MyCharacter->GetInitialPower() * 1.25;
     }
-    if (HUDWidgetClass != nullptr)  
+    if (HUDWidgetClass != nullptr)
     {
         CurrentWidget = CreateWidget<UUserWidget>(GetWorld(), HUDWidgetClass);
         if (CurrentWidget != nullptr)
         {
             CurrentWidget->AddToViewport();
-        }
-    }
-    //find all spawn volume actors.
-    TArray<AActor*> FoundActors;
-    UGameplayStatics::GetAllActorsOfClass(GetWorld(), ASpawnVolume::StaticClass(), FoundActors);
-
-    for (auto Actor : FoundActors)
-    {
-        ASpawnVolume* SpawnVolumeActor = Cast<ASpawnVolume>(Actor);
-        if (SpawnVolumeActor)
-        {
-            SpawnVolumeActors.AddUnique(SpawnVolumeActor);
         }
     }
 }
@@ -96,4 +85,88 @@ EBatteryPlayState ABatteryCollectorGameMode::GetCurrentState() const
 void ABatteryCollectorGameMode::SetCurrentState(EBatteryPlayState NewState)
 {
     CurrentState = NewState;
+    HandleNewState(CurrentState);
+}
+
+void ABatteryCollectorGameMode::HandleNewState(EBatteryPlayState NewState)
+{
+    switch (NewState)
+    {
+        case EBatteryPlayState::EPlaying:
+        {
+            //spawn volume actives
+            ActivateSpawn();
+        }
+        break;
+        case EBatteryPlayState::EWon:
+        {
+            //spawn volume inactives
+            DeactivateSpawn();
+        }
+        break;
+        case EBatteryPlayState::EGameOver:
+        {
+            //spawn volume inactives
+            DeactivateSpawn();
+            //block player input
+            BlockPlayerInput();
+            //ragdoll the character
+            RagdollCharacter();
+        }break;
+        default:
+        {
+
+        }
+        break;
+    }
+}
+
+void ABatteryCollectorGameMode::InitializeSpawn()
+{
+    TArray<AActor*> FoundActors;
+    UGameplayStatics::GetAllActorsOfClass(GetWorld(), ASpawnVolume::StaticClass(), FoundActors);
+
+    for (auto Actor : FoundActors)
+    {
+        ASpawnVolume* SpawnVolumeActor = Cast<ASpawnVolume>(Actor);
+        if (SpawnVolumeActor)
+        {
+            SpawnVolumeActors.AddUnique(SpawnVolumeActor);
+        }
+    }
+}
+
+void ABatteryCollectorGameMode::DeactivateSpawn()
+{
+    for (ASpawnVolume* Volume : SpawnVolumeActors)
+    {
+        Volume->SetSpawningActive(false);
+    }
+}
+
+void ABatteryCollectorGameMode::ActivateSpawn()
+{
+    for (ASpawnVolume* Volume : SpawnVolumeActors)
+    {
+        Volume->SetSpawningActive(true);
+    }
+}
+
+void ABatteryCollectorGameMode::BlockPlayerInput()
+{
+    APlayerController* PlayerController = UGameplayStatics::GetPlayerController(this, 0);
+    if (PlayerController) 
+    {
+        PlayerController->SetCinematicMode(true, false, false, true, true);
+    }
+}
+
+void ABatteryCollectorGameMode::RagdollCharacter()
+{
+    ACharacter* MyCharacter = UGameplayStatics::GetPlayerCharacter(this, 0);
+    if (MyCharacter)
+    {
+        MyCharacter->GetMesh()->SetSimulatePhysics(true);
+        MyCharacter->GetMovementComponent()->MovementState.bCanJump = false;
+    }
 }
