@@ -46,5 +46,5 @@ void APickup::OnCollect_Implementation()
     FString debugString = GetName();
     UE_LOG(LogClass, Log, TEXT("You have collected %s"), *debugString);
 
-    SetActive(false);
+    
 }

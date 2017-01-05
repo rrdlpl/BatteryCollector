@@ -162,6 +162,8 @@ void ABatteryCollectorCharacter::CollectPickups()
             // Call the pickup OnCollect function
             //UE_LOG(LogClass, Log, TEXT("Destroying pickup "));
             Pickup->OnCollect();
+            //This will prevent picking up the same battery
+            Pickup->SetActive(false);
             //Check if the pickup is a battery
             ABatteryPickup* const Battery = Cast<ABatteryPickup>(Pickup);
             if (Battery)
