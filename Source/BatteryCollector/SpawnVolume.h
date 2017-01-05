@@ -8,50 +8,54 @@
 UCLASS()
 class BATTERYCOLLECTOR_API ASpawnVolume : public AActor
 {
-	GENERATED_BODY()
+    GENERATED_BODY()
 
 public:
-	// Sets default values for this actor's properties
-	ASpawnVolume();
+    // Sets default values for this actor's properties
+    ASpawnVolume();
 
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
+    // Called when the game starts or when spawned
+    virtual void BeginPlay() override;
 
-	// Called every frame
-	virtual void Tick(float DeltaSeconds) override;
+    // Called every frame
+    virtual void Tick(float DeltaSeconds) override;
 
-	FORCEINLINE class UBoxComponent* GetWhereToSpawn() const { return WhereToSpawn; };
-	/**Returns random point within box component*/
-	UFUNCTION(BlueprintPure, Category = "Spawning")
-		FVector GetRandomPointInVolume();
+    FORCEINLINE class UBoxComponent* GetWhereToSpawn() const { return WhereToSpawn; };
+    /**Returns random point within box component*/
+    UFUNCTION(BlueprintPure, Category = "Spawning")
+        FVector GetRandomPointInVolume();
 
-	UFUNCTION(BlueprintPure, Category = "Spawning")
-		FRotator GetRandomRotation();
+    UFUNCTION(BlueprintPure, Category = "Spawning")
+        FRotator GetRandomRotation();
+
+    /**This function toggles whether or not the spawn volume spawn pickups */
+    UFUNCTION(BlueprintCallable, Category = "Spawning")
+        void SetSpawningActive(bool ShouldSpawn);
 
 protected:
 
-	/** The pickup to spawn */
-	UPROPERTY(EditAnywhere, Category = "Spawning")
-		TSubclassOf<class APickup> WhatToSpawn;
+    /** The pickup to spawn */
+    UPROPERTY(EditAnywhere, Category = "Spawning")
+        TSubclassOf<class APickup> WhatToSpawn;
 
-	FTimerHandle SpawnTimer;
+    FTimerHandle SpawnTimer;
 
-	/** Minimum spawn delay*/
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawning")
-		float SpawnDelayRangeLow;
+    /** Minimum spawn delay*/
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawning")
+        float SpawnDelayRangeLow;
 
-	/** Max spawn delay*/
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawning")
-		float SpawnDelayRangeHigh;
+    /** Max spawn delay*/
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawning")
+        float SpawnDelayRangeHigh;
 
 private:
-	/** Box to specify where the battery should spawn*/
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Spawning", meta = (AllowPrivateAccess = "true"))
-	class UBoxComponent* WhereToSpawn;
+    /** Box to specify where the battery should spawn*/
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Spawning", meta = (AllowPrivateAccess = "true"))
+    class UBoxComponent* WhereToSpawn;
 
-	void SpawnPickup();
-	/**The current spawn delay*/
-	float SpawnDelay;
+    void SpawnPickup();
+    /**The current spawn delay*/
+    float SpawnDelay;
 
-	void UpdateSpawnTimer();
+    void UpdateSpawnTimer();
 };
